@@ -1,0 +1,20 @@
+Submitted by Group 12 (Harshithaa Sundareswaran, Daniel Townley)
+
+Compilation and Execution:
+Please compile using the enclosed makefile.
+
+The frame is defined as a data structure with the following fields: type, seq,
+eof_pos, and data. The type field is enumerable with four possible values:
+DATA, ACK, FT_REQ, and EMPTY.
+
+The DATA type indicates that this frame holds a portion if a file being
+transmitted in its DATA field (see below). The ACK type indicates that this frame is an acknowledgment of a previous data frame received by the server. FT_REQ is a special class of frame used to initiate a file transfer. This type of packet is used to request that the server begins transferring files, and uses the DATA field to hold the name of the duplicate file to be created by the server. Finally, an EMPTY is used by the server to manage its frame buffer. Frames in the server's buffer are initialized as empty; when the server receives a frame whose sequence number is within its receive window, it will store that frame at the appropriate index of the buffer, setting the type to DATA or FT_REQ. When a frame is processed by the server, the type of that frame is reset to EMPTY. This allows the server to detect gaps within its receive window in case of out-of-order delivery, and stall when a gap is encountered to ensure in-order processing.
+
+The frame also includes a sequence number seq. This field is defined explicitly as a 32-bit integer to insure interoperability. This ensures that if the maximum sequence number is defined as something larger than a 32-bit integer, the sequence numbers will overflow and repeat in a consistent way, even if the client and server define different lengths for the default integer type. If the frame's type is DATA, this number represents the sequence in which the frame is to be processed. if the type is ACK, this field stores the sequence number of the frame to which the ACK is a response.
+
+An integer eof_pos determines the location of an end of file within the data field. If the value of this field is less than one, the data for this frame does not contain an eof. Otherwise, the DATA contains an eof at the index specified by eof_pos. Since the EOF is a special signal that cannot be unambiguously represented in the data field, eof_pos is needed to explicitly identify the last frame, and the last byte to be read from its data field. 
+
+Finally, each frame includes a 256-byte data field. If the frame is of type DATA, this field contains up to 256 bytes of the file being transmitted. If the type is FT_REQ, it contains the name of the server-side output file as a null-terminated string.
+
+Note that our implementation also provides a dedicated structure for ACKs, which omits the eof_pos and data fields, which are unused by ACKs. The remaining
+fields fulfill the functions described above.
